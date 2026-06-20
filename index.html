@@ -855,10 +855,22 @@
     ];
 
     const soundFiles = {
-      start: 'sounds/a-jugar-100-mexicanos-dijeron_uzh3r4B(1).mp3',
-      correct: 'sounds/correcto-100-mexicanos-dijeron.mp3',
-      incorrect: 'sounds/incorrecto-100-mexicanos-dijeron(1).mp3',
-      victory: 'sounds/triunfo-100-mexicanos-dijeron(1).mp3'
+      start: [
+        'sounds/a-jugar-100-mexicanos-dijeron_uzh3r4B(1).mp3.mp3',
+        'sounds/a-jugar-100-mexicanos-dijeron_uzh3r4B(1).mp3'
+      ],
+      correct: [
+        'sounds/correcto-100-mexicanos-dijeron.mp3.mp3',
+        'sounds/correcto-100-mexicanos-dijeron.mp3'
+      ],
+      incorrect: [
+        'sounds/incorrecto-100-mexicanos-dijeron(1).mp3.mp3',
+        'sounds/incorrecto-100-mexicanos-dijeron(1).mp3'
+      ],
+      victory: [
+        'sounds/triunfo-100-mexicanos-dijeron(1).mp3.mp3',
+        'sounds/triunfo-100-mexicanos-dijeron(1).mp3'
+      ]
     };
 
     const audioCache = {};
@@ -985,10 +997,22 @@
     function effect(type, extra = {}) { state.effect = { id: Date.now() + Math.random(), type, ...extra }; }
 
     function getAudio(name) {
-      if (!soundFiles[name]) return null;
+     const sources = soundFiles[name];
+      if (!sources) return null;
       if (!audioCache[name]) {
-        audioCache[name] = new Audio(soundFiles[name]);
-        audioCache[name].preload = 'auto';
+       const audio = new Audio();
+        audio.preload = 'auto';
+        audio.dataset.sourceIndex = '0';
+        audio.src = sources[0];
+        audio.addEventListener('error', () => {
+          const current = Number(audio.dataset.sourceIndex) || 0;
+          const next = current + 1;
+          if (next >= sources.length) return;
+          audio.dataset.sourceIndex = String(next);
+          audio.src = sources[next];
+          try { audio.load(); } catch {}
+        });
+        audioCache[name] = audio;
       }
       return audioCache[name];
     }
