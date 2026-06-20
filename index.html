@@ -276,8 +276,8 @@
     .answer-row.revealed {
       background: linear-gradient(90deg, #06266c, #07103d 70%, #431a00);
       border-color: var(--gold);
-      animation: cardReveal .58s ease both;
     }
+    .answer-row.revealed.recent { animation: cardReveal .58s ease both; }
     .answer-row.revealed.recent::after { animation: shine .72s ease-out; }
     .answer-index {
       min-width: 40px;
@@ -691,6 +691,7 @@
 <body>
   <div id="app" class="app"></div>
 
+  <script src="https://unpkg.com/peerjs@1.5.5/dist/peerjs.min.js"></script>
   <script>
     'use strict';
 
@@ -706,6 +707,11 @@
     const CHANNEL_NAME = '100_papas_dijeron_channel_v1';
     const params = new URLSearchParams(location.search);
     const VIEW = params.get('view') === 'host' ? 'host' : 'game';
+    const ROOM = (params.get('room') || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '').slice(0, 40);
+    const REMOTE_GAME_ID = ROOM ? `100papas-${ROOM}-game` : '';
+    const remoteConnections = new Set();
+    let peer = null;
+    let remoteReady = false;
     const channel = 'BroadcastChannel' in window ? new BroadcastChannel(CHANNEL_NAME) : null;
     const $app = document.getElementById('app');
 
@@ -965,18 +971,80 @@
       }
     }
 
-    function saveState(broadcast = true) {
+    function saveState(broadcast = true, remote = true) {
       state.view = VIEW;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       if (broadcast && channel) channel.postMessage({ type: 'state', state });
+    if (remote) sendRemoteState();
     }
 
     function setState(updater, options = {}) {
       const previous = structuredCloneSafe(state);
       updater(state);
       state = normalizeState(state);
-      saveState(options.broadcast !== false);
+      saveState(options.broadcast !== false, options.remote !== false);
       render(previous);
+    }
+
+    
+    function remoteLabel() {
+      if (!ROOM) return 'Local';
+      if (!('Peer' in window)) return `Sala ${ROOM} · sin PeerJS`;
+      return remoteReady ? `Sala ${ROOM} · conectado` : `Sala ${ROOM} · esperando conexión`;
+    }
+
+    function setupRemoteControl() {
+      if (!ROOM || !('Peer' in window)) return;
+      try {
+        if (VIEW === 'game') {
+          peer = new Peer(REMOTE_GAME_ID);
+          peer.on('open', () => { remoteReady = remoteConnections.size > 0; render(); });
+          peer.on('connection', conn => attachRemoteConnection(conn));
+          peer.on('disconnected', () => { remoteReady = false; render(); });
+          peer.on('error', err => console.warn('Control remoto no disponible:', err));
+        } else {
+          peer = new Peer();
+          peer.on('open', () => {
+            attachRemoteConnection(peer.connect(REMOTE_GAME_ID, { reliable: true }));
+          });
+          peer.on('error', err => { console.warn('Control remoto no disponible:', err); remoteReady = false; render(); });
+        }
+      } catch (err) {
+        console.warn('No se pudo iniciar control remoto.', err);
+      }
+    }
+
+    function attachRemoteConnection(conn) {
+      if (!conn) return;
+      remoteConnections.add(conn);
+      conn.on('open', () => {
+        remoteReady = true;
+        if (VIEW === 'game') conn.send({ type: 'state', state });
+        render();
+      });
+      conn.on('data', data => {
+        if (!data || data.type !== 'state') return;
+        const previous = structuredCloneSafe(state);
+        state = normalizeState(data.state);
+        saveState(false, false);
+        render(previous);
+      });
+      conn.on('close', () => {
+        remoteConnections.delete(conn);
+        remoteReady = remoteConnections.size > 0;
+        render();
+      });
+      conn.on('error', err => console.warn('Error de control remoto:', err));
+    }
+
+    function sendRemoteState() {
+      if (!ROOM || !remoteConnections.size) return;
+      const payload = { type: 'state', state };
+      remoteConnections.forEach(conn => {
+        if (conn.open) {
+          try { conn.send(payload); } catch (err) { console.warn('No se pudo enviar estado remoto.', err); }
+        }
+      });
     }
 
     function structuredCloneSafe(obj) {
@@ -988,7 +1056,7 @@
         if (!ev.data || ev.data.type !== 'state') return;
         const previous = structuredCloneSafe(state);
         state = normalizeState(ev.data.state);
-        saveState(false);
+        saveState(false, false);
         render(previous);
       };
     }
@@ -1402,7 +1470,7 @@
         $app.innerHTML = `${audioButton}<main class="intro-screen">
           <section class="intro-card">
             ${logoHTML('big')}
-            <div class="intro-help">Abre el panel del conductor en <b>index.html?view=host</b> y presiona <b>INICIAR SHOW</b></div>
+            <div class="intro-help">Abre el panel del conductor en <b>index.html?view=host</b> y presiona <b>INICIAR SHOW</b>.<br>Para celular: usa la misma sala en ambos equipos, por ejemplo <b>?view=game&room=fiesta</b> en la computadora y <b>?view=host&room=fiesta</b> en el celular.</div>
           </section>
         </main>`;
         return;
@@ -1542,7 +1610,7 @@
         <header class="host-header">
           <div>
             <h1 class="host-title"><span>100 PAPÁS DIJERON</span> · Panel del conductor</h1>
-            <div class="host-sub">Abre otra pestaña con <b>index.html?view=game</b>. Los cambios se sincronizan con localStorage + BroadcastChannel.</div>
+            <div class="host-sub">Abre otra pestaña con <b>index.html?view=game</b>. Para manejarlo desde celular, abre la pantalla del juego con <b>?view=game&room=fiesta</b> y este panel con <b>?view=host&room=fiesta</b>. Estado: <b>${esc(remoteLabel())}</b>.</div>
           </div>
           <div class="host-row" style="justify-content:flex-end">
             <button class="btn primary" data-action="startShow">INICIAR SHOW</button>
@@ -1793,6 +1861,7 @@
       if (ev.key === 'ArrowLeft') actions.prevRound();
     });
 
+    setupRemoteControl();
     render();
   </script>
 </body>
