@@ -124,11 +124,12 @@
 
     /* GAME VIEW */
     .game-screen {
-      min-height: 100vh;
+     height: 100vh;
+      height: 100dvh;
       display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 1.2vh;
-      padding: 1.1vh 1.2vw 1.4vh;
+     grid-template-rows: minmax(74px, auto) minmax(0, 1fr) auto;
+      gap: clamp(.35rem, .8vh, .75rem);
+      padding: clamp(.35rem, .8vh, .7rem) 1.2vw;
       overflow: hidden;
     }
 
@@ -147,8 +148,8 @@
     }
 
     .score-card {
-      padding: 1rem 1.1rem;
-      min-height: 108px;
+      padding: clamp(.45rem, 1vh, .8rem) 1rem;
+      min-height: clamp(74px, 12vh, 100px);
       position: relative;
       overflow: hidden;
     }
@@ -175,7 +176,7 @@
     .score-card.control .control-badge { display: block; }
 
     .brand-block { text-align: center; }
-    .subtitle { margin-top: .45rem; font-size: clamp(.92rem, 1.3vw, 1.25rem); color: #fff; letter-spacing: .08em; text-transform: uppercase; text-shadow: 0 2px 9px rgba(0,0,0,.65); }
+    .subtitle { margin-top: clamp(.15rem, .5vh, .45rem); font-size: clamp(.78rem, 1.1vw, 1.1rem); color: #fff; letter-spacing: .08em; text-transform: uppercase; text-shadow: 0 2px 9px rgba(0,0,0,.65); }
 
     .game-mid {
       display: grid;
@@ -185,25 +186,25 @@
       min-height: 0;
     }
 
-    .side-stack { display: flex; flex-direction: column; gap: 1rem; justify-content: center; }
-    .status-pill { padding: .8rem; text-align: center; }
+    .side-stack { display: flex; flex-direction: column; gap: clamp(.45rem, 1vh, .8rem); justify-content: center; min-height: 0; }
+    .status-pill { padding: clamp(.45rem, 1vh, .7rem); text-align: center; }
     .status-pill .mini { color: var(--muted); font-size: clamp(.8rem, 1.1vw, 1rem); letter-spacing: .08em; text-transform: uppercase; }
-    .status-pill .value { color: var(--gold); font-size: clamp(2rem, 4vw, 4rem); line-height: 1; text-shadow: 0 4px 0 #4a1b00; }
-    .status-pill.bank .value { color: #fff; font-size: clamp(3rem, 6vw, 6.2rem); }
+    .status-pill .value { color: var(--gold); font-size: clamp(1.6rem, 3.2vw, 3.3rem); line-height: 1; text-shadow: 0 4px 0 #4a1b00; }
+    .status-pill.bank .value { color: #fff; font-size: clamp(2.2rem, 4.8vw, 5rem); }
 
-    .center-stage { display: flex; flex-direction: column; gap: 1rem; min-height: 0; }
+    .center-stage { display: flex; flex-direction: column; gap: clamp(.45rem, .9vh, .8rem); min-height: 0; }
     .question-box {
       position: relative;
-      padding: .8rem 1.4rem;
+      padding: clamp(.45rem, 1vh, .7rem) 1.2rem;
       border-radius: 24px;
       text-align: center;
       background: linear-gradient(180deg, rgba(4,16,78,.95), rgba(5,5,23,.96));
       border: 4px solid var(--fuchsia);
       box-shadow: 0 0 22px rgba(255,46,234,.55), inset 0 0 20px rgba(0,232,255,.18);
       color: white;
-      font-size: clamp(1.35rem, 2.7vw, 3rem);
+       font-size: clamp(1.1rem, 2.25vw, 2.55rem);
       text-shadow: 0 3px 0 #00193f;
-      min-height: 82px;
+      min-height: clamp(54px, 9vh, 76px);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -212,8 +213,8 @@
     .board-shell {
       position: relative;
       flex: 1;
-      min-height: 420px;
-      padding: 22px;
+      min-height: 0;
+      padding: clamp(12px, 1.8vh, 20px);
       border-radius: 34px;
       background: linear-gradient(135deg, #a6004e, #ff2eea 34%, #5e004f 65%, #ffb300);
       box-shadow: 0 18px 44px rgba(0,0,0,.58), 0 0 36px rgba(255,46,234,.55);
@@ -237,8 +238,8 @@
       height: 100%;
       display: flex;
       flex-direction: column;
-      gap: .65rem;
-      padding: 2.7rem 1.4rem 1.4rem;
+      gap: clamp(.35rem, .8vh, .6rem);
+      padding: clamp(2rem, 4.3vh, 2.6rem) clamp(.8rem, 1.3vw, 1.4rem) clamp(.65rem, 1.4vh, 1.2rem);
       background: radial-gradient(circle at 50% 20%, rgba(0,232,255,.16), transparent 35%), linear-gradient(180deg, #05091e, #010108);
       border: 6px solid #23003d;
       border-radius: 22px;
@@ -261,9 +262,10 @@
       display: grid;
       grid-template-columns: auto 1fr auto;
       align-items: center;
-      gap: .7rem;
-      min-height: 55px;
-      padding: .55rem .85rem;
+      gap: .6rem;
+      flex: 1 1 0;
+      min-height: 0;
+      padding: clamp(.32rem, .75vh, .5rem) .75rem;
       border-radius: 14px;
       border: 2px solid rgba(255,216,90,.46);
       background: linear-gradient(90deg, rgba(10,31,104,.95), rgba(6,13,55,.96));
@@ -322,8 +324,8 @@
       gap: clamp(.6rem, 1.1vw, 1.2rem);
     }
     .strike {
-      width: clamp(70px, 8vw, 112px);
-      height: clamp(70px, 8vw, 112px);
+      width: clamp(52px, 6vw, 78px);
+      height: clamp(52px, 6vw, 78px);
       border: 5px solid rgba(255,255,255,.25);
       border-radius: 22px;
       display: flex;
@@ -331,7 +333,7 @@
       justify-content: center;
       color: rgba(255,255,255,.18);
       background: rgba(0,0,0,.32);
-      font-size: clamp(3.2rem, 7vw, 7.2rem);
+      font-size: clamp(2.4rem, 5vw, 5rem);
       line-height: .8;
       text-shadow: none;
     }
@@ -345,7 +347,7 @@
     .message-banner {
       justify-self: center;
       max-width: 100%;
-      padding: .65rem 1.25rem;
+      padding: clamp(.4rem, .8vh, .6rem) 1.1rem;
       border-radius: 999px;
       background: rgba(5,5,23,.72);
       border: 3px solid rgba(255,216,90,.78);
@@ -649,6 +651,18 @@
     .small { font-size: .82rem; }
     .danger-zone { border-color: rgba(255,33,79,.35); background: rgba(255,33,79,.08); }
 
+    
+    @media (max-height: 760px) and (min-width: 761px) {
+      .logo.small { font-size: clamp(1.25rem, 2.2vw, 2rem); }
+      .team-name { font-size: clamp(1.25rem, 2.2vw, 2.3rem); }
+      .team-score { font-size: clamp(2rem, 4vw, 4.2rem); }
+      .control-badge { font-size: .78rem; padding: .2rem .48rem; }
+      .answer-index { min-width: 34px; height: 34px; }
+      .answer-text { font-size: clamp(1.05rem, 1.9vw, 2.05rem); }
+      .answer-points { min-width: 54px; font-size: clamp(1.25rem, 2.25vw, 2.35rem); }
+      .message-banner { font-size: clamp(.9rem, 1.6vw, 1.2rem); }
+    }
+    
     @media (max-width: 1120px) {
       .game-mid { grid-template-columns: 1fr; }
       .side-stack { flex-direction: row; order: -1; }
@@ -664,7 +678,7 @@
       .answer-control { grid-template-columns: auto 1fr; }
       .answer-control button { grid-column: 1 / -1; }
       .fast-host-row { grid-template-columns: 1fr; }
-      .board-shell { min-height: 360px; padding: 14px; }
+      .board-shell { min-height: 0; padding: 14px; }
       .board { padding: 2.2rem .7rem .8rem; }
       .answer-row { min-height: 50px; }
     }
